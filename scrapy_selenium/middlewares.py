@@ -30,7 +30,9 @@ class SeleniumMiddleware:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, error = process.communicate()
             chrome_version = output.decode("utf-8").strip().split()[-1]
-            logger.info(f"Detected Chrome version: {chrome_version}")
+            major_version = version.parse(chrome_version).major
+            logger.info(f"Detected Chrome version: {chrome_version} (major: {major_version})")
+            logger.info(f"Will attempt to use ChromeDriver version {major_version}.0")
             return chrome_version
         except Exception as e:
             logger.warning(f"Could not determine Chrome version: {e}")
@@ -42,7 +44,7 @@ class SeleniumMiddleware:
             if chrome_version:
                 major_version = version.parse(chrome_version).major
                 logger.info(f"Looking for ChromeDriver version matching Chrome {major_version}")
-                return ChromeDriverManager(version=f"{major_version}").install()
+                return ChromeDriverManager(driver_version=f"{major_version}.0").install()
             else:
                 logger.info("Using latest ChromeDriver version")
                 return ChromeDriverManager().install()
